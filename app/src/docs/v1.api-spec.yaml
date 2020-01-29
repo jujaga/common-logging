@@ -1,0 +1,208 @@
+---
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: Common Logging Service API
+  description: >-
+    CLOGS - A common hosted service (API) for writing log messages to a central repository.
+  license:
+    name: Apache 2.0
+    url: "https://www.apache.org/licenses/LICENSE-2.0.html"
+  contact:
+    name: NR Common Service Showcase
+    email: NR.CommonServiceShowcase@gov.bc.ca
+servers:
+  - url: /api/v1
+    description: This Server
+security:
+  - OpenID: []
+paths:
+  /log:
+    post:
+      summary: Log a message
+      description: >-
+        This endpoint accepts a document template and a set (or multiple sets)
+        of subsitution variables and merges them into the document.
+      operationId: postLog
+      tags:
+        - Log
+      security:
+        - OpenID:
+            - LOGGER
+      requestBody:
+        description: Fields required to write a log message
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoggingObject"
+      responses:
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    OpenID:
+      type: openIdConnect
+      openIdConnectUrl: >-
+        https://sso.pathfinder.gov.bc.ca/auth/realms/jbd6rnxw/.well-known/openid-configuration
+  schemas:
+    BadRequest:
+      allOf:
+        - $ref: "#/components/schemas/Problem"
+        - type: object
+          properties:
+            status:
+              example: 400
+            title:
+              example: Bad Request
+            type:
+              example: "https://httpstatuses.com/400"
+    ContextObject:
+      type: object
+      description: >-
+        A freeform JSON object of key-value pairs.  All keys must be
+        alphanumeric or underscore.
+      example:
+        something:
+          greeting: Hello
+          target: World
+        someone: user
+    Error:
+      allOf:
+        - $ref: "#/components/schemas/Problem"
+        - type: object
+          properties:
+            status:
+              example: 500
+            title:
+              example: Internal Server Error
+            type:
+              example: "https://httpstatuses.com/500"
+    LoggingObject:
+      type: object
+      description: >-
+        Contains the message to log.  Message or Data field must be provided.  Format used to parse Message.  Format and LogLevel are completely optional.
+      properties:
+        message:
+          type: string
+          description: A message to log
+          example: "::ffff:172.51.124.1 - - [2/Jan/2020:16:04:10 +0000] \"GET /pathtonowhere/here/there HTTP/1.1\" 302 40 \"-\" \"kube-probe/1.11+\""
+        pattern:
+          type: string
+          description: a Grok pattern used to parse message field
+          example: "%{IP:client} \- %{USER:remoteUser} \[%{HTTPDATE:rawTimestamp}\] \"%{WORD:httpMethod} %{PATH:path} HTTP\/%{DATA:httpVersion}\" %{NUMBER:httpStatus} %{NUMBER:contentLength} \"%{DATA:referrer}\" \"%{DATA:userAgent}\""
+        level:
+          type: string
+          description: A logging level
+          example: "debug"
+        data:
+          type: object
+          description: A message to log in JSON form
+          example: "{\"client\": \"172.51.124.1\",\"remoteUser\": \"-\",\"timestamp\": \"2/Jan/2020:16:04:10 +0000\"}"
+    NotFound:
+      allOf:
+        - $ref: "#/components/schemas/Problem"
+        - type: object
+          properties:
+            status:
+              example: 404
+            title:
+              example: Not Found
+            type:
+              example: "https://httpstatuses.com/404"
+    Problem:
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          description: "What type of problem, link to explanation of problem"
+        title:
+          type: string
+          description: "Title of problem, generally the Http Status Code description"
+        status:
+          type: string
+          description: The Http Status code
+        detail:
+          type: string
+          description: Short description of why this problem was raised.
+    ValidationError:
+      allOf:
+        - $ref: "#/components/schemas/Problem"
+        - type: object
+          required:
+            - errors
+          properties:
+            errors:
+              type: array
+              items:
+                type: object
+                required:
+                  - message
+                properties:
+                  value:
+                    type: object
+                    description: Contents of the field that was in error.
+                    example: utf-8x
+                  message:
+                    type: string
+                    description: The error message for the field.
+                    example: Invalid value `encoding`.
+            status:
+              example: 422
+            title:
+              example: Unprocessable Entity
+            type:
+              example: "https://httpstatuses.com/422"
+  responses:
+    BadRequest:
+      description: Request is missing content or is malformed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BadRequest"
+    Error:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Lack required role to perform action
+    NoContent:
+      description: Accepted and no content
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NotFound"
+    UnauthorizedError:
+      description: Access token is missing or invalid
+    UnprocessableEntity:
+      description: >-
+        The server was unable to process the contained instructions. Generally
+        validation error(s).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValidationError"
