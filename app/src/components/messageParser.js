@@ -1,6 +1,6 @@
 const moment = require('moment');
 const grok = require('../grok').loadDefaultSync();
-const LOGLEVEL_PATTERN = grok.createPattern('%{LOGLEVEL:level} %{GREEDYDATA:message}');
+const LOGLEVEL_PATTERN = grok.createPattern('^%{LOGLEVEL:level} %{GREEDYDATA:message}$');
 
 const grokParse = (pattern, message) => {
   return new Promise((resolve, reject) => {
@@ -24,7 +24,8 @@ const messageParser = {
     const clogs = {
       client: authorizedParty,
       timestamp: moment.utc().valueOf(),
-      level: obj['level'] ? obj['level'] : 'info'
+      level: obj['level'] ? obj['level'] : 'info',
+      retention: obj['retention'] ? obj['retention'] : 'default'
     };
     if (obj['message']) {
       // No supplied format/grok pattern...

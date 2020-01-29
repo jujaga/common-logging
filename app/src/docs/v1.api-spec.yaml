@@ -4,7 +4,8 @@ info:
   version: 1.0.0
   title: Common Logging Service API
   description: >-
-    CLOGS - A common hosted service (API) for writing log messages to a central repository.
+    CLOGS - A common hosted service (API) for writing log messages to a central
+    repository.
   license:
     name: Apache 2.0
     url: "https://www.apache.org/licenses/LICENSE-2.0.html"
@@ -73,16 +74,6 @@ components:
               example: Bad Request
             type:
               example: "https://httpstatuses.com/400"
-    ContextObject:
-      type: object
-      description: >-
-        A freeform JSON object of key-value pairs.  All keys must be
-        alphanumeric or underscore.
-      example:
-        something:
-          greeting: Hello
-          target: World
-        someone: user
     Error:
       allOf:
         - $ref: "#/components/schemas/Problem"
@@ -95,26 +86,65 @@ components:
             type:
               example: "https://httpstatuses.com/500"
     LoggingObject:
+      type: array
+      description: Contains an array of Logging Entry Objects.
+      items:
+        oneOf:
+          - $ref: "#/components/schemas/LoggingEntryDataObject"
+          - $ref: "#/components/schemas/LoggingEntryMessageObject"
+    LoggingEntryBaseObject:
       type: object
       description: >-
-        Contains the message to log.  Message or Data field must be provided.  Format used to parse Message.  Format and LogLevel are completely optional.
+        Contains the message to log. The Message or Data field must be provided.
+        Pattern field is an optional Grok filter and is used to parse Message.
+        Level and Retention fields are optional.
       properties:
-        message:
-          type: string
-          description: A message to log
-          example: "::ffff:172.51.124.1 - - [2/Jan/2020:16:04:10 +0000] \"GET /pathtonowhere/here/there HTTP/1.1\" 302 40 \"-\" \"kube-probe/1.11+\""
-        pattern:
-          type: string
-          description: a Grok pattern used to parse message field
-          example: "%{IP:client} \- %{USER:remoteUser} \[%{HTTPDATE:rawTimestamp}\] \"%{WORD:httpMethod} %{PATH:path} HTTP\/%{DATA:httpVersion}\" %{NUMBER:httpStatus} %{NUMBER:contentLength} \"%{DATA:referrer}\" \"%{DATA:userAgent}\""
         level:
           type: string
-          description: A logging level
-          example: "debug"
-        data:
-          type: object
-          description: A message to log in JSON form
-          example: "{\"client\": \"172.51.124.1\",\"remoteUser\": \"-\",\"timestamp\": \"2/Jan/2020:16:04:10 +0000\"}"
+          description: An optional logging level. Defaults to info if not specified.
+          example: info
+        pattern:
+          type: string
+          description: An optional Grok pattern used to parse message field
+          example: >-
+            %{IP:client} \- %{USER:remoteUser} \[%{HTTPDATE:rawTimestamp}\]
+            \"%{WORD:httpMethod} %{PATH:path} HTTP\/%{DATA:httpVersion}\"
+            %{NUMBER:httpStatus} %{NUMBER:contentLength} \"%{DATA:referrer}\"
+            \"%{DATA:userAgent}\"
+        retention:
+          type: string
+          description: >-
+            An optional unique string representing the intended retention policy
+            this entry should follow. Will default to value 'default' if not
+            specified.
+          example: default
+    LoggingEntryDataObject:
+      allOf:
+        - $ref: "#/components/schemas/LoggingEntryBaseObject"
+        - type: object
+          required:
+            - data
+          properties:
+            data:
+              type: object
+              description: A message to log in JSON form
+              example: >-
+                {"client": "172.51.124.1","remoteUser": "-","timestamp":
+                "2/Jan/2020:16:04:10 +0000"}
+    LoggingEntryMessageObject:
+      allOf:
+        - $ref: "#/components/schemas/LoggingEntryBaseObject"
+        - type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              description: A message to log
+              example: >-
+                ::ffff:172.51.124.1 - - [2/Jan/2020:16:04:10 +0000] "GET
+                /pathtonowhere/here/there HTTP/1.1" 302 40 "-"
+                "kube-probe/1.11+"
     NotFound:
       allOf:
         - $ref: "#/components/schemas/Problem"
