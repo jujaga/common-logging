@@ -46,7 +46,7 @@ As this is a Node application, please ensure that you have all dependencies inst
 
 #### Windows
 
-If you are installing on Windows, you will likely encounter a node-gyp installation failure when running `npm install`. To avoid this, you need to have Visual Studio Windows Build Tools installed, as well as Python 2.7.
+If you are installing on Windows, you will likely encounter a node-gyp installation failure when running `npm install`. To avoid this, you need to have Visual Studio Windows Build Tools installed, as well as Python 2.7. ([Source](https://github.com/Microsoft/vscode/issues/34251#issuecomment-329131206))
 
 Run `npm install --global --production windows-build-tools` in a PowerShell in Admin mode. This command will install Python 2.7 and a few other build chain components and may take a few minutes to complete. If everything installs correctly, you should be able to try `npm install` again and it should succeed.
 
