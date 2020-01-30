@@ -9,7 +9,7 @@ loggingRouter.post('/', validateLogging, async (req, res, next) => {
   try {
     const clogsMessage = await messageParser.parse(req.authorizedParty, req.body);
     await logstashSvc.log(clogsMessage);
-    res.send();
+    res.status(201).end();
   } catch (error) {
     log.error(error);
     next(error);
