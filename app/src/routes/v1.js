@@ -5,7 +5,7 @@ const YAML = require('yamljs');
 
 const keycloak = require('../components/keycloak');
 
-const loggingRouter = require('./v1/loggingRouter');
+const loggingRouter = require('./v1/logging');
 
 const clientId = config.get('keycloak.clientId');
 
@@ -29,7 +29,7 @@ router.get('/api-spec.yaml', (_req, res) => {
   res.sendFile(path.join(__dirname, '../docs/v1.api-spec.yaml'));
 });
 
-// OpenAPI JSON Spec
+/** OpenAPI JSON Spec */
 router.get('/api-spec.json', (_req, res) => {
   res.status(200).json(YAML.load(path.join(__dirname, '../docs/v1.api-spec.yaml')));
 });
