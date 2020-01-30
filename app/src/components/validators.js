@@ -29,7 +29,7 @@ const models = {
 };
 
 const customValidators = {
-  logging: async (obj) => {
+  logging: async obj => {
     // validate the logging endpoint
     // completely valid object will return an empty array of errors.
     // an invalid object will return a populated array of errors.

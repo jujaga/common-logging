@@ -15,11 +15,25 @@ const grokParse = (pattern, message) => {
 };
 
 const messageParser = {
-  /** Parse an incoming log request into HALPAS JSON object
-     *  @param {object} obj A JSON Object, pre-validated to contain expected fields
-     *  @returns {object} Returns a JSON Object for HALPAS logstash
-     */
+  /**
+   *  Parse an array of incoming log requests into an array HALPAS JSON object
+   *  @param {string} authorizedParty A string representing the authorized party
+   *  @param {object[]} obj A JSON Array, pre-validated to contain expected fields
+   *  @returns {object[]} Returns an array of JSON Object for HALPAS logstash
+   */
   parse: async (authorizedParty, obj) => {
+    return await Promise.all(
+      obj.map(async entry => await messageParser.parseEntry(authorizedParty, entry))
+    );
+  },
+
+  /**
+   *  Parse an incoming log request into HALPAS JSON object
+   *  @param {string} authorizedParty A string representing the authorized party
+   *  @param {object} obj A JSON Object, pre-validated to contain expected fields
+   *  @returns {object} Returns a JSON Object for HALPAS logstash
+   */
+  parseEntry: async (authorizedParty, obj) => {
     // default clogs object with metadata
     const clogs = {
       client: authorizedParty,
@@ -27,6 +41,7 @@ const messageParser = {
       level: obj['level'] ? obj['level'] : 'info',
       retention: obj['retention'] ? obj['retention'] : 'default'
     };
+
     if (obj['message']) {
       // No supplied format/grok pattern...
       if (!obj['pattern']) {
