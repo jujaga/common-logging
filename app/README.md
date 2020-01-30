@@ -44,6 +44,12 @@ In order for the application to run correctly, you will need to ensure that the 
 
 As this is a Node application, please ensure that you have all dependencies installed as needed. This can be done by running `npm install`.
 
+#### Windows
+
+If you are installing on Windows, you will likely encounter a node-gyp installation failure when running `npm install`. To avoid this, you need to have Visual Studio Windows Build Tools installed, as well as Python 2.7. ([Source](https://github.com/Microsoft/vscode/issues/34251#issuecomment-329131206))
+
+Run `npm install --global --production windows-build-tools` in a PowerShell in Admin mode. This command will install Python 2.7 and a few other build chain components and may take a few minutes to complete. If everything installs correctly, you should be able to try `npm install` again and it should succeed.
+
 ### Configuration
 
 Configuration management is done using the [config](https://www.npmjs.com/package/config) library. There are two ways to configure:
@@ -102,7 +108,7 @@ This API is defined and described in OpenAPI 3.0 specification. When the API is 
 
 ### General Design
 
-The `/log` endpoint request body is composed of 2 main parts.  
+The `/log` endpoint request body is composed of 2 main parts.
 
 1. The **message** field (string with optional GROK **pattern**)
 2. or the **data** field (JSON object)
@@ -185,11 +191,11 @@ Sends this to ElK Logstash
 ```
 POST api/v1/log
 {
-    "data": { 
-        "who": "we", 
-        "did": "built", 
-        "what": "this city", 
-        "level": "fatal", 
+    "data": {
+        "who": "we",
+        "did": "built",
+        "what": "this city",
+        "level": "fatal",
         "sub": {
             "obj": "data"
         }

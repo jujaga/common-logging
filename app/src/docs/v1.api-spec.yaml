@@ -38,6 +38,8 @@ paths:
             schema:
               $ref: "#/components/schemas/LoggingObject"
       responses:
+        "201":
+          description: The request has been fulfilled and has resulted in one or more new resources being created
         "400":
           $ref: "#/components/responses/BadRequest"
         "401":
