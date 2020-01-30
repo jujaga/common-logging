@@ -1,6 +1,6 @@
 {
   "elkStack": {
-    "logstashUrl": "http://logstash-master-beats-http-plugin:8080"
+    "logstashUrl": "https://logstash-master-beats-http-plugin:8080"
   },
   "keycloak": {
     "realm": "jbd6rnxw",
