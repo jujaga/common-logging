@@ -1,5 +1,5 @@
 const Problem = require('api-problem');
-const {customValidators} = require('../components/validators');
+const { customValidators } = require('../components/validators');
 
 const handleValidationErrors = (res, next, errors) => {
   if (errors && errors.length) {
@@ -17,4 +17,4 @@ const validateLogging = async (req, res, next) => {
   handleValidationErrors(res, next, errors);
 };
 
-module.exports = {validateLogging};
+module.exports = { validateLogging };

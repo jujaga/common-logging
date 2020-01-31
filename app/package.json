@@ -1,13 +1,14 @@
 {
   "name": "clogs",
-  "version": "0.0.1",
-  "description": "Common Logging Service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CLOGS - A common logging API for writing logs",
   "scripts": {
     "build": "echo Nothing to build",
-    "serve": "nodemon ./bin/www",
+    "serve": "./node_modules/.bin/nodemon ./bin/www",
     "start": "node ./bin/www",
-    "lint": "node_modules/.bin/eslint . --no-fix --ignore-pattern 'node_modules' --ignore-pattern 'grok' --ext .js",
-    "lint:fix": "node_modules/.bin/eslint . --fix --ignore-pattern 'node_modules' --ignore-pattern 'grok' --ext .js",
+    "lint": "node_modules/.bin/eslint . --no-fix --ext .js",
+    "lint:fix": "node_modules/.bin/eslint . --fix --ext .js",
     "test": "node_modules/.bin/jest --verbose",
     "clean": "rm -rf coverage dist",
     "pretest": "npm run lint",
@@ -17,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bcgov/common-logging-service.git"
+    "url": "git+https://github.com/bcgov/common-logging.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "NR Common Service Showcase <NR.CommonServiceShowcase@gov.bc.ca>",
+  "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/bcgov/common-logging-service/issues"
+    "url": "https://github.com/bcgov/common-logging/issues"
   },
-  "homepage": "https://github.com/bcgov/common-logging-service#readme",
+  "homepage": "https://bcgov.github.io/common-logging",
   "dependencies": {
     "api-problem": "^6.0.1",
     "async": "^3.1.1",
@@ -76,7 +77,10 @@
       ],
       "indent": [
         "error",
-        2
+        2,
+        {
+          "SwitchCase": 1
+        }
       ],
       "linebreak-style": [
         "error",
@@ -112,9 +116,9 @@
     "collectCoverage": true,
     "collectCoverageFrom": [
       "src/**/*.js",
-      "!src/middleware/*.*",
+      "!src/docs/*.*",
       "!src/grok/*.*",
-      "!src/docs/*.*"
+      "!src/middleware/*.*"
     ],
     "testResultsProcessor": "jest-sonar-reporter"
   },
