@@ -29,9 +29,9 @@ const apiTrackerFormat = ':op :azp :ts :message :data :pattern :level :status :r
 
 const apiTrackerPattern = '%{DATA:op} %{DATA:azp} %{NUMBER:ts} %{DATA:hasMessage} %{DATA:hasData} %{DATA:hasPattern} %{DATA:hasLevel} %{NUMBER:httpStatus} %{NUMBER:responseTime}';
 
-const stashMessage = async (msg) => {
-  const body = {message: msg.trim(), pattern: apiTrackerPattern};
-  const clogsMessage = await messageParser.parse(config.get('keycloak.clientId'), body);
+const stashMessage = async msg => {
+  const body = { message: msg.trim(), pattern: apiTrackerPattern };
+  const clogsMessage = await messageParser.parseEntry(config.get('keycloak.clientId'), body);
   const success = await logstashSvc.log(clogsMessage);
   return success;
 };
@@ -43,23 +43,23 @@ const apiTracker = async (req, res, next) => {
     req._op = req.url === logUrl ? 'LOG' : 'Unknown';
 
     /*
-            When/If we need to parse data out of the response, we would do it here...
-            const defaultEnd = res.end;
-            const chunks = [];
-            res.end = (...restArgs) => {
-                try {
-                    if (restArgs[0]) {
-                        chunks.push(Buffer.from(restArgs[0]));
-                    }
-                    const body = Buffer.concat(chunks).toString('utf8');
-                    const obj = JSON.parse(body);
+    // When/If we need to parse data out of the response, we would do it here...
+    const defaultEnd = res.end;
+    const chunks = [];
+    res.end = (...restArgs) => {
+      try {
+        if (restArgs[0]) {
+          chunks.push(Buffer.from(restArgs[0]));
+        }
+        const body = Buffer.concat(chunks).toString('utf8');
+        const obj = JSON.parse(body);
 
-                } catch (err) {
-                    log.error('mailApiTracker', err);
-                }
-                defaultEnd.apply(res, restArgs);
-            };
-            */
+      } catch (err) {
+        log.error('mailApiTracker', err);
+      }
+      defaultEnd.apply(res, restArgs);
+    };
+    */
   }
   next();
 };
@@ -106,11 +106,11 @@ const initializeApiTracker = app => {
 
   app.use(morgan(apiTrackerFormat, {
     // eslint-disable-next-line no-unused-vars
-    skip: function (req, res) {
+    skip: (req, _res) => {
       return !trackerUrls.includes(req.baseUrl);
     },
     stream: {
-      write: (s) => {
+      write: s => {
         if (s && s.trim().length) {
           process.stdout.write(s);
           stashMessage(s);

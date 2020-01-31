@@ -3,11 +3,14 @@ const config = require('config');
 const log = require('npmlog');
 const Problem = require('api-problem');
 
+const utils = require('./utils');
+
 const logstashSvc = {
   log: async msg => {
+    console.log(JSON.stringify(msg));
     try {
       const response = await axios.post(
-        config.get('elkStack.logstashUrl'),
+        config.get('elkStack.logstashUrl')+'.zz',
         msg,
         {
           headers: {
@@ -20,10 +23,10 @@ const logstashSvc = {
       if (response.status !== 200) throw new Error('HTTP response not 200');
     } catch (e) {
       if (e.response) {
-        log.error(`Error from LOGSTASH: status = ${e.response.status}, data : ${JSON.stringify(e.response.data, null, 2)}`);
+        log.error('logstashSvc.log', `Error from LOGSTASH: status = ${e.response.status}, data : ${utils.prettyStringify(e.response.data)}`);
         throw new Problem(e.response.status, { detail: e.response.data.detail });
       } else {
-        log.error(`Unknown error calling LOGSTASH: ${e.message}`);
+        log.error('logstashSvc.log', `Unknown error calling LOGSTASH: ${e.message}`);
         throw new Problem(500, 'Unknown LOGSTASH Error', { detail: e.message });
       }
     }

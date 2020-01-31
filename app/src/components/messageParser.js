@@ -23,7 +23,7 @@ const messageParser = {
    */
   parse: async (authorizedParty, obj) => {
     return await Promise.all(
-      obj.map(async entry => await messageParser.parseEntry(authorizedParty, entry))
+      obj.map(entry => messageParser.parseEntry(authorizedParty, entry))
     );
   },
 
