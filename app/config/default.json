@@ -1,6 +1,6 @@
 {
   "elkStack": {
-    "logstashUrl": "https://logstash-master-ixhmbm-dev.pathfinder.gov.bc.ca/http"
+    "logstashUrl": "https://logstash-jason-ixhmbm-dev.pathfinder.gov.bc.ca/http"
   },
   "keycloak": {
     "realm": "jbd6rnxw",
