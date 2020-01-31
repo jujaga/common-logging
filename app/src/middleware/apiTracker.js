@@ -31,9 +31,8 @@ const apiTrackerPattern = '%{DATA:op} %{DATA:azp} %{NUMBER:ts} %{DATA:hasMessage
 
 const stashMessage = async msg => {
   const body = { message: msg.trim(), pattern: apiTrackerPattern };
-  const clogsMessage = await messageParser.parseEntry(config.get('keycloak.clientId'), body);
-  const success = await logstashSvc.log(clogsMessage);
-  return success;
+  const clogsMessage = await messageParser.parse(config.get('keycloak.clientId'), body);
+  return await logstashSvc.log(clogsMessage);
 };
 
 const apiTracker = async (req, res, next) => {

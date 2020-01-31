@@ -7,8 +7,8 @@ const { validateLogging } = require('../../middleware/validation');
 
 loggingRouter.post('/', validateLogging, async (req, res, next) => {
   try {
-    const clogsMessages = await messageParser.parse(req.authorizedParty, req.body);
-    await Promise.all(clogsMessages.map(msg => logstashSvc.log(msg)));
+    const clogsMessages = await messageParser.parseMany(req.authorizedParty, req.body);
+    await logstashSvc.logMany(clogsMessages);
     res.status(201).end();
   } catch (error) {
     log.error(error);

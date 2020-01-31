@@ -6,11 +6,27 @@ const Problem = require('api-problem');
 const utils = require('./utils');
 
 const logstashSvc = {
+  /**
+   *  @function logMany
+   *  Sends an array of CLOGS log entries to a logstash endpoint
+   *  @param {object[]} msg An array of CLOGS JSON objects
+   */
+  logMany: async msgArr => {
+    await Promise.all(
+      msgArr.map(msg => logstashSvc.log(msg))
+    );
+  },
+
+  /**
+   *  @function log
+   *  Sends a CLOGS log entry to a logstash endpoint
+   *  @param {object} msg A CLOGS JSON object
+   *  @throws if something unexpected occurs
+   */
   log: async msg => {
-    console.log(JSON.stringify(msg));
     try {
       const response = await axios.post(
-        config.get('elkStack.logstashUrl')+'.zz',
+        config.get('elkStack.logstashUrl'),
         msg,
         {
           headers: {

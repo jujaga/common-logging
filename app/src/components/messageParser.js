@@ -2,6 +2,13 @@ const moment = require('moment');
 const grok = require('../grok').loadDefaultSync();
 const LOGLEVEL_PATTERN = grok.createPattern('^%{LOGLEVEL:level} %{GREEDYDATA:message}$');
 
+/**
+ *  @function grokParse
+ *  Returns a promise for the parsed message based on a pattern
+ *  @param {string} pattern The GROK pattern to use
+ *  @param {string} message The message to parse
+ *  @returns {object} A parsed message object
+ */
 const grokParse = (pattern, message) => {
   return new Promise((resolve, reject) => {
     pattern.parse(message, (error, result) => {
@@ -16,24 +23,26 @@ const grokParse = (pattern, message) => {
 
 const messageParser = {
   /**
+   *  @function parseMany
    *  Parse an array of incoming log requests into an array HALPAS JSON object
    *  @param {string} authorizedParty A string representing the authorized party
    *  @param {object[]} obj A JSON Array, pre-validated to contain expected fields
    *  @returns {object[]} Returns an array of JSON Object for HALPAS logstash
    */
-  parse: async (authorizedParty, obj) => {
+  parseMany: async (authorizedParty, obj) => {
     return await Promise.all(
-      obj.map(entry => messageParser.parseEntry(authorizedParty, entry))
+      obj.map(entry => messageParser.parse(authorizedParty, entry))
     );
   },
 
   /**
+   *  @function parse
    *  Parse an incoming log request into HALPAS JSON object
    *  @param {string} authorizedParty A string representing the authorized party
    *  @param {object} obj A JSON Object, pre-validated to contain expected fields
    *  @returns {object} Returns a JSON Object for HALPAS logstash
    */
-  parseEntry: async (authorizedParty, obj) => {
+  parse: async (authorizedParty, obj) => {
     // default clogs object with metadata
     const clogs = {
       client: authorizedParty,
