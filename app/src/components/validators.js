@@ -24,10 +24,13 @@ const models = {
 };
 
 const customValidators = {
+  /**
+   *  @function logging
+   *  @param {object} obj A CLOGS log body object
+   *  @returns {object[]} A populated array of errors if `obj` is not valid.
+   *  A valid `obj` will return an empty array.
+   */
   logging: obj => {
-    // validate the logging endpoint
-    // completely valid object will return an empty array of errors.
-    // an invalid object will return a populated array of errors.
     const errors = [];
 
     if (!Array.isArray(obj)) {
@@ -65,7 +68,7 @@ const customValidators = {
 };
 
 const validatorUtils = {
-  /** @function isString */
+  /** @function isString Checks if value is a string object */
   isString: x => {
     return Object.prototype.toString.call(x) === '[object String]';
   }
