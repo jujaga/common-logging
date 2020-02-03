@@ -3,7 +3,10 @@ const express = require('express');
 const log = require('npmlog');
 const Problem = require('api-problem');
 
-/** This class provides helper utilities that are commonly used in tests */
+/**
+ *  @class helper
+ *  Provides helper utilities that are commonly used in tests
+ */
 const helper = {
   /**
    *  @function expressHelper
