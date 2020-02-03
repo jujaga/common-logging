@@ -35,19 +35,21 @@ const customValidators = {
 
     if (!Array.isArray(obj)) {
       errors.push({ value: obj, message: 'Invalid value `logging`. Expect an array of logging entries.' });
+    } else if (!obj.length) {
+      errors.push({ value: obj, message: 'Invalid value `logging`. Array must not be empty.' });
     } else {
       obj.forEach(o => {
-        let count = 0;
+        let errCount = 0;
         if (!models.loggingEntry.data(o.data)) {
           errors.push({ value: o.data, message: 'Invalid value `data`.' });
-          count++;
+          errCount++;
         }
         if (!models.loggingEntry.level(o.level)) {
           errors.push({ value: o.level, message: 'Invalid value `level`.' });
         }
         if (!models.loggingEntry.message(o.message)) {
           errors.push({ value: o.message, message: 'Invalid value `message`.' });
-          count++;
+          errCount++;
         }
         if (!models.loggingEntry.pattern(o.pattern)) {
           errors.push({ value: o.pattern, message: 'Invalid value `pattern`.' });
@@ -57,8 +59,10 @@ const customValidators = {
         }
 
         // need a valid message or valid data object to log
-        if (count === 2 || !(o['data'] || o['message'])) {
+        if (errCount === 2 || !o.data && !o.message) {
           errors.push({ message: '`message` or `data` is required.' });
+        } else if (o.data && o.message) {
+          errors.push({ message: 'Only one of `message` or `data` should be defined.' });
         }
       });
     }
