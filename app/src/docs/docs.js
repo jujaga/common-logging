@@ -1,8 +1,8 @@
 const docs = {
-  getDocHTML: version => `<!DOCTYPE html>
+  getDocHTML: (title, version) => `<!DOCTYPE html>
   <html>
     <head>
-      <title>Common Hosted Document Generation Service API - Documentation ${version}</title>
+      <title>${title} - Documentation ${version}</title>
       <!-- needed for adaptive design -->
       <meta charset="utf-8"/>
       <meta name="viewport" content="width=device-width, initial-scale=1">
