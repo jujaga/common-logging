@@ -1,9 +1,7 @@
-const config = require('config');
-const log = require('npmlog');
-
+const helper = require('../../common/helper');
 const utils = require('../../../src/components/utils');
 
-log.level = config.get('server.logLevel');
+helper.logHelper();
 
 describe('prettyStringify', () => {
   const obj = {

@@ -11,9 +11,6 @@ const basePath = '/api/v1/log';
 const app = helper.expressHelper(basePath, router);
 helper.logHelper();
 
-jest.mock('../../../../src/components/logstashSvc');
-jest.mock('../../../../src/components/messageParser');
-
 describe(`POST ${basePath}`, () => {
   const logManySpy = jest.spyOn(logstashSvc, 'logMany');
   const parseManySpy = jest.spyOn(messageParser, 'parseMany');
