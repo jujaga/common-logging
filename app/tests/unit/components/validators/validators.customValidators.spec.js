@@ -6,7 +6,7 @@ helper.logHelper();
 
 describe('customValidators.logging', () => {
   const loggingEntryBase = {
-    level: 'INFO',
+    level: 'info',
     pattern: '%{GREEDYDATA:data}',
     retention: 'default'
   };

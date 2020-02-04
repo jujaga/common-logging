@@ -6,16 +6,17 @@ const messageParser = require('../../../src/components/messageParser');
 helper.logHelper();
 
 const azp = 'TEST_SERVICE_CLIENT';
+const now = moment.utc().valueOf();
 const clogs = {
   client: azp,
   data: {},
   level: 'info',
   retention: 'default',
-  timestamp: moment.utc().valueOf()
+  timestamp: now
 };
 const loggingEntryBase = {
-  level: 'INFO',
-  pattern: '%{GREEDYDATA:data}',
+  level: 'info',
+  pattern: '%{GREEDYDATA:test}',
   retention: 'default'
 };
 
@@ -55,5 +56,130 @@ describe('parseMany', () => {
     expect(result[1]).toEqual(clogs);
     expect(parseSpy).toHaveBeenCalledTimes(2);
     expect(parseSpy).toHaveBeenCalledWith(azp, loggingEntryBase);
+  });
+});
+
+describe('parse', () => {
+  it('should return an object when input is undefined', async () => {
+    const result = await messageParser.parse(undefined, undefined);
+
+    expect(result).toBeTruthy();
+    expect(result.clogs).toBeTruthy();
+    expect(result.clogs.level).toEqual('info');
+    expect(result.clogs.retention).toEqual('default');
+    expect(result.clogs.timestamp).toBeTruthy();
+  });
+
+  it('should return an object when input is missing message and data', async () => {
+    const result = await messageParser.parse(azp, loggingEntryBase);
+
+    expect(result).toBeTruthy();
+    expect(result.clogs).toBeTruthy();
+    expect(result.clogs.client).toEqual(azp);
+    expect(result.clogs.level).toEqual('info');
+    expect(result.clogs.retention).toEqual('default');
+    expect(result.clogs.timestamp).toBeTruthy();
+  });
+
+  it('should return a correct object when input has data and level', async () => {
+    const level = 'warn';
+    const data = { level: level };
+    const obj = Object.assign({}, loggingEntryBase, { data: data, level: level });
+
+    const result = await messageParser.parse(azp, obj);
+
+    expect(result).toBeTruthy();
+    expect(result.clogs).toBeTruthy();
+    expect(result.clogs.client).toEqual(azp);
+    expect(result.clogs.data).toEqual(data);
+    expect(result.clogs.data.level).toEqual(level);
+    expect(result.clogs.level).toEqual(level);
+    expect(result.clogs.retention).toEqual('default');
+    expect(result.clogs.timestamp).toBeTruthy();
+  });
+
+  it('should return a correct object when input has data and retention', async () => {
+    const data = { foo: 'bar' };
+    const retention = 'test';
+    const obj = Object.assign({}, loggingEntryBase, { data: data, retention: retention });
+
+    const result = await messageParser.parse(azp, obj);
+
+    expect(result).toBeTruthy();
+    expect(result.clogs).toBeTruthy();
+    expect(result.clogs.client).toEqual(azp);
+    expect(result.clogs.data).toEqual(data);
+    expect(result.clogs.level).toEqual('info');
+    expect(result.clogs.retention).toEqual(retention);
+    expect(result.clogs.timestamp).toBeTruthy();
+  });
+
+  it('should return a correct object when input has a message and no pattern', async () => {
+    const message = 'message';
+    const obj = Object.assign({}, loggingEntryBase, { message: message });
+    delete obj.pattern;
+
+    const result = await messageParser.parse(azp, obj);
+
+    expect(result).toBeTruthy();
+    expect(result.clogs).toBeTruthy();
+    expect(result.clogs.client).toEqual(azp);
+    expect(result.clogs.data).toBeTruthy();
+    expect(result.clogs.data.message).toEqual(message);
+    expect(result.clogs.level).toEqual('info');
+    expect(result.clogs.retention).toEqual('default');
+    expect(result.clogs.timestamp).toBeTruthy();
+  });
+
+  it('should return a correct object when input has a level prefixed message and no pattern', async () => {
+    const level = 'warn';
+    const message = 'message';
+    const obj = Object.assign({}, loggingEntryBase, { message: `${level} ${message}` });
+    delete obj.pattern;
+
+    const result = await messageParser.parse(azp, obj);
+
+    expect(result).toBeTruthy();
+    expect(result.clogs).toBeTruthy();
+    expect(result.clogs.client).toEqual(azp);
+    expect(result.clogs.data).toBeTruthy();
+    expect(result.clogs.data.message).toEqual(message);
+    expect(result.clogs.level).toEqual(level);
+    expect(result.clogs.retention).toEqual('default');
+    expect(result.clogs.timestamp).toBeTruthy();
+  });
+
+  it('should return a correct object when input has a message and invalid grok pattern', async () => {
+    const message = 'message';
+    const pattern = 'garbage';
+    const obj = Object.assign({}, loggingEntryBase, { message: message, pattern: pattern });
+
+    const result = await messageParser.parse(azp, obj);
+
+    expect(result).toBeTruthy();
+    expect(result.clogs).toBeTruthy();
+    expect(result.clogs.client).toEqual(azp);
+    expect(result.clogs.data).toBeTruthy();
+    expect(result.clogs.data.message).toEqual(message);
+    expect(result.clogs.data.pattern).toEqual(pattern);
+    expect(result.clogs.level).toEqual('info');
+    expect(result.clogs.retention).toEqual('default');
+    expect(result.clogs.timestamp).toBeTruthy();
+  });
+
+  it('should return a correct object when input has a message and valid grok pattern', async () => {
+    const message = 'message';
+    const obj = Object.assign({}, loggingEntryBase, { message: message });
+
+    const result = await messageParser.parse(azp, obj);
+
+    expect(result).toBeTruthy();
+    expect(result.clogs).toBeTruthy();
+    expect(result.clogs.client).toEqual(azp);
+    expect(result.clogs.data).toBeTruthy();
+    expect(result.clogs.data.test).toEqual(message);
+    expect(result.clogs.level).toEqual('info');
+    expect(result.clogs.retention).toEqual('default');
+    expect(result.clogs.timestamp).toBeTruthy();
   });
 });
