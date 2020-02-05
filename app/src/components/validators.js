@@ -2,65 +2,67 @@ const models = {
   loggingEntry: {
     /** @function data is not required and must be an object */
     data: value => {
-      const o = value['data'];
-      return !o || (o && o != null && o.constructor.name === 'Object');
+      return !value || (value && value !== null && value.constructor.name === 'Object');
     },
     /** @function level is not required, must be a string */
     level: value => {
-      const o = value['level'];
-      return !o || (o && validatorUtils.isString(o));
+      return !value || (value && validatorUtils.isString(value));
     },
     /** @function message is not required, must be a string */
     message: value => {
-      const o = value['message'];
-      return !o || (o && validatorUtils.isString(o));
+      return !value || (value && validatorUtils.isString(value));
     },
     /** @function pattern is not required, must be a string */
     pattern: value => {
-      const o = value['pattern'];
-      return !o || (o && validatorUtils.isString(o));
+      return !value || (value && validatorUtils.isString(value));
     },
     /** @function retention is not required, must be a string */
     retention: value => {
-      const o = value['retention'];
-      return !o || (o && validatorUtils.isString(o));
+      return !value || (value && validatorUtils.isString(value));
     },
   }
 };
 
 const customValidators = {
+  /**
+   *  @function logging
+   *  @param {object} obj A CLOGS log body object
+   *  @returns {object[]} A populated array of errors if `obj` is not valid.
+   *  A valid `obj` will return an empty array.
+   */
   logging: obj => {
-    // validate the logging endpoint
-    // completely valid object will return an empty array of errors.
-    // an invalid object will return a populated array of errors.
     const errors = [];
 
     if (!Array.isArray(obj)) {
       errors.push({ value: obj, message: 'Invalid value `logging`. Expect an array of logging entries.' });
+    } else if (!obj.length) {
+      errors.push({ value: obj, message: 'Invalid value `logging`. Array must not be empty.' });
     } else {
-      obj.forEach(obj => {
-        let count = 0;
-        if (!models.loggingEntry.data(obj)) {
-          errors.push({ value: obj['data'], message: 'Invalid value `data`.' });
-          count++;
+      obj.forEach(o => {
+        let errCount = 0;
+        if (!models.loggingEntry.data(o.data)) {
+          errors.push({ value: o.data, message: 'Invalid value `data`.' });
+          errCount++;
         }
-        if (!models.loggingEntry.level(obj)) {
-          errors.push({ value: obj['level'], message: 'Invalid value `level`.' });
+        if (!models.loggingEntry.level(o.level)) {
+          errors.push({ value: o.level, message: 'Invalid value `level`.' });
         }
-        if (!models.loggingEntry.message(obj)) {
-          errors.push({ value: obj['message'], message: 'Invalid value `message`.' });
-          count++;
+        if (!models.loggingEntry.message(o.message)) {
+          errors.push({ value: o.message, message: 'Invalid value `message`.' });
+          errCount++;
         }
-        if (!models.loggingEntry.pattern(obj)) {
-          errors.push({ value: obj['pattern'], message: 'Invalid value `pattern`.' });
+        if (!models.loggingEntry.pattern(o.pattern)) {
+          errors.push({ value: o.pattern, message: 'Invalid value `pattern`.' });
         }
-        if (!models.loggingEntry.retention(obj)) {
-          errors.push({ value: obj['retention'], message: 'Invalid value `retention`.' });
+        if (!models.loggingEntry.retention(o.retention)) {
+          errors.push({ value: o.retention, message: 'Invalid value `retention`.' });
         }
 
         // need a valid message or valid data object to log
-        if (count === 2 || !(obj['data'] || obj['message'])) {
+        if (errCount === 2 || !o.data && !o.message) {
           errors.push({ message: '`message` or `data` is required.' });
+        } else if (o.data && o.message) {
+          errors.push({ message: 'Only one of `message` or `data` should be defined.' });
         }
       });
     }
@@ -70,7 +72,7 @@ const customValidators = {
 };
 
 const validatorUtils = {
-  /** @function isString */
+  /** @function isString Checks if value is a string object */
   isString: x => {
     return Object.prototype.toString.call(x) === '[object String]';
   }

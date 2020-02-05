@@ -3,14 +3,18 @@ const express = require('express');
 const log = require('npmlog');
 const Problem = require('api-problem');
 
-/** This class provides helper utilities that are commonly used in tests */
+/**
+ *  @class helper
+ *  Provides helper utilities that are commonly used in tests
+ */
 const helper = {
   /**
-     * Creates a stripped-down simple Express server object
-     * @param {string} basePath The path to mount the `router` on
-     * @param {object} router An express router object to mount
-     * @returns A simple express server object with `router` mounted to `basePath`
-     */
+   *  @function expressHelper
+   *  Creates a stripped-down simple Express server object
+   *  @param {string} basePath The path to mount the `router` on
+   *  @param {object} router An express router object to mount
+   *  @returns {object} A simple express server object with `router` mounted to `basePath`
+   */
   expressHelper: (basePath, router) => {
     const app = express();
 
@@ -41,8 +45,9 @@ const helper = {
   },
 
   /**
-     * Configures an npmlog instance to have debug level logging and the right log level
-     */
+   *  @function logHelper
+   *  Configures an npmlog instance to have debug level logging and the right log level
+   */
   logHelper: () => {
     log.level = config.get('server.logLevel');
     log.addLevel('debug', 1500, {

@@ -12,11 +12,7 @@ const LOGLEVEL_PATTERN = grok.createPattern('^%{LOGLEVEL:level} %{GREEDYDATA:mes
 const grokParse = (pattern, message) => {
   return new Promise((resolve, reject) => {
     pattern.parse(message, (error, result) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(result);
-      }
+      return error ? reject(error) : resolve(result);
     });
   });
 };
@@ -46,43 +42,42 @@ const messageParser = {
     // default clogs object with metadata
     const clogs = {
       client: authorizedParty,
+      level: (obj && obj.level) ? obj.level : 'info',
+      retention: (obj && obj.retention) ? obj.retention : 'default',
       timestamp: moment.utc().valueOf(),
-      level: obj['level'] ? obj['level'] : 'info',
-      retention: obj['retention'] ? obj['retention'] : 'default'
     };
 
-    if (obj['message']) {
+    if (obj && obj.message) {
       // No supplied format/grok pattern...
-      if (!obj['pattern']) {
-        //  does it start with a log level?
+      if (!obj.pattern) {
+        // does it start with a log level?
         const pattern = grok.getPattern(LOGLEVEL_PATTERN.id);
-        const o = await grokParse(pattern, obj['message']);
+        const o = await grokParse(pattern, obj.message);
         if (o) {
           // yes, so set the level and remove level from data message
           clogs.level = o.level;
           // set the data message
-          clogs.data = {message: o.message};
+          clogs.data = { message: o.message };
         } else {
           // no log level, set the data message
-          clogs.data = {message: obj['message']};
+          clogs.data = { message: obj.message };
         }
-
       } else {
         // pattern supplied, use it
-        const pattern = grok.createPattern(obj['pattern']);
-        const o = await grokParse(pattern, obj['message']);
+        const pattern = grok.createPattern(obj.pattern);
+        const o = await grokParse(pattern, obj.message);
         if (o) {
           clogs.level = o.level ? o.level : 'info';
           clogs.data = Object.assign({}, o);
         } else {
           // couldn't match up the expected pattern... return message and pattern
-          clogs.data = {message: obj['message'], pattern: obj['pattern']};
+          clogs.data = { message: obj.message, pattern: obj.pattern };
         }
       }
     } else {
       // passed in JSON, let's touch it up and pass it along...
-      if (obj['data']) {
-        clogs.data = Object.assign({}, obj['data']);
+      if (obj && obj.data) {
+        clogs.data = Object.assign({}, obj.data);
         if (clogs.data.level) {
           clogs.level = clogs.data.level;
         }

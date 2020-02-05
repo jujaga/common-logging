@@ -21,7 +21,7 @@ router.get('/', (_req, res) => {
 /** OpenAPI Docs */
 router.get('/docs', (_req, res) => {
   const docs = require('../docs/docs');
-  res.send(docs.getDocHTML('v1'));
+  res.send(docs.getDocHTML('Common Logging Service API', 'v1'));
 });
 
 /** OpenAPI YAML Spec */
