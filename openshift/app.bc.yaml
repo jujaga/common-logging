@@ -45,6 +45,7 @@ objects:
           FROM BuildConfig
           # Install python dependency for node-gyp rebuild
           RUN apk update && apk add python make g++
+          ENV NO_UPDATE_NOTIFIER=true
           # and install the app
           COPY . .
           RUN npm ci
