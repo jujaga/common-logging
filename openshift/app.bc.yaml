@@ -43,6 +43,7 @@ objects:
         type: Git
         dockerfile: |-
           FROM BuildConfig
+          ENV NO_UPDATE_NOTIFIER=true
           # Install python dependency for node-gyp rebuild
           RUN apk update && apk add python make g++
           # and install the app
