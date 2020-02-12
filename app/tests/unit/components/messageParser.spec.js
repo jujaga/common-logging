@@ -68,6 +68,7 @@ describe('parse', () => {
     expect(result.clogs.level).toEqual('info');
     expect(result.clogs.retention).toEqual('default');
     expect(result.clogs.timestamp).toBeTruthy();
+    expect(result.clogs.env).toEqual('dev');
   });
 
   it('should return an object when input is missing message and data', async () => {
@@ -79,6 +80,7 @@ describe('parse', () => {
     expect(result.clogs.level).toEqual('info');
     expect(result.clogs.retention).toEqual('default');
     expect(result.clogs.timestamp).toBeTruthy();
+    expect(result.clogs.env).toEqual('dev');
   });
 
   it('should return a correct object when input has data and level', async () => {
@@ -96,6 +98,7 @@ describe('parse', () => {
     expect(result.clogs.level).toEqual(level);
     expect(result.clogs.retention).toEqual('default');
     expect(result.clogs.timestamp).toBeTruthy();
+    expect(result.clogs.env).toEqual('dev');
   });
 
   it('should return a correct object when input has data and retention', async () => {
@@ -112,6 +115,7 @@ describe('parse', () => {
     expect(result.clogs.level).toEqual('info');
     expect(result.clogs.retention).toEqual(retention);
     expect(result.clogs.timestamp).toBeTruthy();
+    expect(result.clogs.env).toEqual('dev');
   });
 
   it('should return a correct object when input has a message and no pattern', async () => {
@@ -129,6 +133,7 @@ describe('parse', () => {
     expect(result.clogs.level).toEqual('info');
     expect(result.clogs.retention).toEqual('default');
     expect(result.clogs.timestamp).toBeTruthy();
+    expect(result.clogs.env).toEqual('dev');
   });
 
   it('should return a correct object when input has a level prefixed message and no pattern', async () => {
@@ -147,6 +152,7 @@ describe('parse', () => {
     expect(result.clogs.level).toEqual(level);
     expect(result.clogs.retention).toEqual('default');
     expect(result.clogs.timestamp).toBeTruthy();
+    expect(result.clogs.env).toEqual('dev');
   });
 
   it('should return a correct object when input has a message and invalid grok pattern', async () => {
@@ -165,6 +171,7 @@ describe('parse', () => {
     expect(result.clogs.level).toEqual('info');
     expect(result.clogs.retention).toEqual('default');
     expect(result.clogs.timestamp).toBeTruthy();
+    expect(result.clogs.env).toEqual('dev');
   });
 
   it('should return a correct object when input has a message and valid grok pattern', async () => {
@@ -181,5 +188,27 @@ describe('parse', () => {
     expect(result.clogs.level).toEqual('info');
     expect(result.clogs.retention).toEqual('default');
     expect(result.clogs.timestamp).toBeTruthy();
+    expect(result.clogs.env).toEqual('dev');
+
   });
+
+  it('should return a correct object when input has a env field', async () => {
+    const message = 'message';
+    const obj = Object.assign({}, loggingEntryBase, { message: message }, {env: 'my-env'}, {metadata: {sub: {field: 'value'}}});
+
+    const result = await messageParser.parse(azp, obj);
+
+    expect(result).toBeTruthy();
+    expect(result.clogs).toBeTruthy();
+    expect(result.clogs.client).toEqual(azp);
+    expect(result.clogs.data).toBeTruthy();
+    expect(result.clogs.data.test).toEqual(message);
+    expect(result.clogs.level).toEqual('info');
+    expect(result.clogs.retention).toEqual('default');
+    expect(result.clogs.timestamp).toBeTruthy();
+    expect(result.clogs.env).toEqual('my-env');
+    expect(result.clogs.sub.field).toEqual('value');
+
+  });
+
 });
