@@ -45,7 +45,12 @@ const messageParser = {
       level: (obj && obj.level) ? obj.level : 'info',
       retention: (obj && obj.retention) ? obj.retention : 'default',
       timestamp: moment.utc().valueOf(),
+      env: (obj && obj.env) ? obj.env : 'dev'
     };
+
+    if (obj && obj.metadata && obj.metadata === Object(obj.metadata)) {
+      Object.assign(clogs, obj.metadata);
+    }
 
     if (obj && obj.message) {
       // No supplied format/grok pattern...
@@ -80,6 +85,9 @@ const messageParser = {
         clogs.data = Object.assign({}, obj.data);
         if (clogs.data.level) {
           clogs.level = clogs.data.level;
+        }
+        if (clogs.data.env) {
+          clogs.env = clogs.data.env;
         }
       }
     }
