@@ -5,6 +5,7 @@ const YAML = require('yamljs');
 
 const keycloak = require('../components/keycloak');
 
+const healthRouter = require('./v1/health');
 const loggingRouter = require('./v1/logging');
 
 const clientId = config.get('keycloak.clientId');
@@ -13,6 +14,7 @@ const clientId = config.get('keycloak.clientId');
 router.get('/', (_req, res) => {
   res.status(200).json({
     endpoints: [
+      '/health',
       '/log'
     ]
   });
@@ -36,5 +38,8 @@ router.get('/api-spec.json', (_req, res) => {
 
 /** Doc Gen Router */
 router.use('/log', keycloak.protect(`${clientId}:LOGGER`), loggingRouter);
+
+/** Health Router */
+router.use('/health', keycloak.protect(), healthRouter);
 
 module.exports = router;

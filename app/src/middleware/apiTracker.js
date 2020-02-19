@@ -67,9 +67,15 @@ const initializeApiTracker = app => {
 
   const tf = (token, req) => {
     try {
-      return req.body[token] ? 'true' : 'false';
+      // message, data, pattern, level are in an array, return a count for each token in the request batch.
+      let count = 0;
+      req.body.forEach(m => {
+        if (m[token]) count++;
+      });
+      // need to return string, will handle 0 integer as false, thus print out '-'...
+      return `${count}`;
     } catch (e) {
-      return 'false';
+      return '0';
     }
   };
 
