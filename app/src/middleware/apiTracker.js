@@ -25,9 +25,9 @@ const trackerUrls = [logUrl];
 
 // add in any token (custom or morgan built-in) we want to the format, then morgan can parse out later
 // status and response-time is a built-in morgan token
-const apiTrackerFormat = ':op :azp :ts :message :data :pattern :level :status :response-time';
+const apiTrackerFormat = ':op :azp :ts :count :message :data :pattern :level :status :response-time';
 
-const apiTrackerPattern = '%{DATA:op} %{DATA:azp} %{NUMBER:ts} %{DATA:hasMessage} %{DATA:hasData} %{DATA:hasPattern} %{DATA:hasLevel} %{NUMBER:httpStatus} %{NUMBER:responseTime}';
+const apiTrackerPattern = '%{DATA:op} %{DATA:azp} %{NUMBER:ts} %{NUMBER:logItemsCount} %{NUMBER:messageFieldCount} %{NUMBER:dataFieldCount} %{NUMBER:patternFieldCount} %{NUMBER:levelFieldCount} %{NUMBER:httpStatus} %{NUMBER:responseTime}';
 
 const stashMessage = async msg => {
   const body = { message: msg.trim(), pattern: apiTrackerPattern };
@@ -65,7 +65,7 @@ const apiTracker = async (req, res, next) => {
 
 const initializeApiTracker = app => {
 
-  const tf = (token, req) => {
+  const fieldCount = (token, req) => {
     try {
       // message, data, pattern, level are in an array, return a count for each token in the request batch.
       let count = 0;
@@ -93,20 +93,24 @@ const initializeApiTracker = app => {
     return req._ts ? req._ts : '0';
   });
 
+  morgan.token('count', req => {
+    return req.body && Array.isArray(req.body) ? req.body.length : '0';
+  });
+
   morgan.token('message', req => {
-    return tf('message', req);
+    return fieldCount('message', req);
   });
 
   morgan.token('data', req => {
-    return tf('data', req);
+    return fieldCount('data', req);
   });
 
   morgan.token('pattern', req => {
-    return tf('pattern', req);
+    return fieldCount('pattern', req);
   });
 
   morgan.token('level', req => {
-    return tf('level', req);
+    return fieldCount('level', req);
   });
 
   app.use(morgan(apiTrackerFormat, {
