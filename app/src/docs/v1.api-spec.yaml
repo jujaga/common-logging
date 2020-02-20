@@ -18,6 +18,40 @@ servers:
 security:
   - OpenID: []
 paths:
+  /health:
+    get:
+      summary: Returns health checks of external service dependencies.
+      description: >-
+        This endpoint returns the state and connectivity of any external
+        services CLOGS depends on.
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        "200":
+          description: Returns the healthiness of the service dependencies
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - dependencies
+                properties:
+                  dependencies:
+                    type: array
+                    description: A list of Health states
+                    items:
+                      $ref: "#/components/schemas/Health"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /log:
     post:
       summary: Log a message
@@ -87,6 +121,25 @@ components:
               example: Internal Server Error
             type:
               example: "https://httpstatuses.com/500"
+    Health:
+      type: object
+      required:
+        - name
+        - healthy
+      properties:
+        name:
+          type: string
+          description: The name of the dependency
+          example: logstash
+        healthy:
+          type: boolean
+          description: Is the dependency reachable/alive
+        info:
+          type: string
+          description: >-
+            Any extra information, generally useful when dependency is
+            unreachable
+          example: Logstash could not be reached, status is 403.
     LoggingObject:
       type: array
       description: Contains an array of Logging Entry Objects.

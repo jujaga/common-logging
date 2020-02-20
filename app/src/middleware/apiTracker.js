@@ -25,13 +25,34 @@ const trackerUrls = [logUrl];
 
 // add in any token (custom or morgan built-in) we want to the format, then morgan can parse out later
 // status and response-time is a built-in morgan token
-const apiTrackerFormat = ':op :azp :ts :message :data :pattern :level :status :response-time';
+const apiTrackerFormat = ':op :azp :ts :count :message :data :pattern :level :status :response-time';
 
-const apiTrackerPattern = '%{DATA:op} %{DATA:azp} %{NUMBER:ts} %{DATA:hasMessage} %{DATA:hasData} %{DATA:hasPattern} %{DATA:hasLevel} %{NUMBER:httpStatus} %{NUMBER:responseTime}';
+const apiTrackerPattern = '%{DATA:op} %{DATA:azp} %{NUMBER:ts} %{NUMBER:logItemsCount} %{NUMBER:messageFieldCount} %{NUMBER:dataFieldCount} %{NUMBER:patternFieldCount} %{NUMBER:levelFieldCount} %{NUMBER:httpStatus} %{NUMBER:responseTime}';
 
 const stashMessage = async msg => {
+  // this is a good way of showing how we eat our own dog food and can turn a string into JSON
   const body = { message: msg.trim(), pattern: apiTrackerPattern };
-  const clogsMessage = await messageParser.parse(config.get('keycloak.clientId'), body);
+  const parsed = await messageParser.parse(config.get('keycloak.clientId'), body);
+  // but let's just massage this object a bit...
+  const clogsMessage = {...parsed};
+  // move all the counts into a sub-object of data...
+  const d = parsed.clogs.data;
+  clogsMessage.clogs.data.items = {
+    count: d.logItemsCount,
+    fields: {
+      message: d.messageFieldCount,
+      data: d.dataFieldCount,
+      pattern: d.patternFieldCount,
+      level: d.levelFieldCount
+    }
+  };
+  // remove all the clogs data count fields.
+  delete clogsMessage.clogs.data.logItemsCount;
+  delete clogsMessage.clogs.data.messageFieldCount;
+  delete clogsMessage.clogs.data.dataFieldCount;
+  delete clogsMessage.clogs.data.patternFieldCount;
+  delete clogsMessage.clogs.data.levelFieldCount;
+
   return await logstashSvc.log(clogsMessage);
 };
 
@@ -65,11 +86,17 @@ const apiTracker = async (req, res, next) => {
 
 const initializeApiTracker = app => {
 
-  const tf = (token, req) => {
+  const fieldCount = (token, req) => {
     try {
-      return req.body[token] ? 'true' : 'false';
+      // message, data, pattern, level are in an array, return a count for each token in the request batch.
+      let count = 0;
+      req.body.forEach(m => {
+        if (m[token]) count++;
+      });
+      // need to return string, will handle 0 integer as false, thus print out '-'...
+      return `${count}`;
     } catch (e) {
-      return 'false';
+      return '0';
     }
   };
 
@@ -87,20 +114,24 @@ const initializeApiTracker = app => {
     return req._ts ? req._ts : '0';
   });
 
+  morgan.token('count', req => {
+    return req.body && Array.isArray(req.body) ? req.body.length : '0';
+  });
+
   morgan.token('message', req => {
-    return tf('message', req);
+    return fieldCount('message', req);
   });
 
   morgan.token('data', req => {
-    return tf('data', req);
+    return fieldCount('data', req);
   });
 
   morgan.token('pattern', req => {
-    return tf('pattern', req);
+    return fieldCount('pattern', req);
   });
 
   morgan.token('level', req => {
-    return tf('level', req);
+    return fieldCount('level', req);
   });
 
   app.use(morgan(apiTrackerFormat, {
