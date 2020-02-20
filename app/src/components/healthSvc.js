@@ -8,7 +8,7 @@ const healthSvc = {
   /**
    *  @function check
    *  Call the health checks.
-   *  1. Call logstash node stats events API to see if we can connect to logstash
+   *  1. Call logstash http (where we submit), to see if it is responsive.
    *  Return health check object array
    */
   check: async () => {
