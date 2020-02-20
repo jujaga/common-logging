@@ -36,13 +36,14 @@ const stashMessage = async msg => {
   // but let's just massage this object a bit...
   const clogsMessage = {...parsed};
   // move all the counts into a sub-object of data...
+  const d = parsed.clogs.data;
   clogsMessage.clogs.data.items = {
-    count: parsed.clogs.data.logItemsCount,
+    count: d.logItemsCount,
     fields: {
-      message: parsed.clogs.data.messageFieldCount,
-      data: parsed.clogs.data.dataFieldCount,
-      pattern: parsed.clogs.data.patternFieldCount,
-      level: parsed.clogs.data.levelFieldCount
+      message: d.messageFieldCount,
+      data: d.dataFieldCount,
+      pattern: d.patternFieldCount,
+      level: d.levelFieldCount
     }
   };
   // remove all the clogs data count fields.

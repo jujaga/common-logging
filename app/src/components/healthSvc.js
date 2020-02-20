@@ -6,11 +6,11 @@ const utils = require('./utils');
 
 const healthSvc = {
   /**
-     *  @function check
-     *  Call the health checks.
-     *  1. Call logstash node stats events API to see if we can connect to logstash
-     *  Return health check object array
-     */
+   *  @function check
+   *  Call the health checks.
+   *  1. Call logstash node stats events API to see if we can connect to logstash
+   *  Return health check object array
+   */
   check: async () => {
     const logstash = {
       name: 'logstash',
