@@ -30,8 +30,28 @@ const apiTrackerFormat = ':op :azp :ts :count :message :data :pattern :level :st
 const apiTrackerPattern = '%{DATA:op} %{DATA:azp} %{NUMBER:ts} %{NUMBER:logItemsCount} %{NUMBER:messageFieldCount} %{NUMBER:dataFieldCount} %{NUMBER:patternFieldCount} %{NUMBER:levelFieldCount} %{NUMBER:httpStatus} %{NUMBER:responseTime}';
 
 const stashMessage = async msg => {
+  // this is a good way of showing how we eat our own dog food and can turn a string into JSON
   const body = { message: msg.trim(), pattern: apiTrackerPattern };
-  const clogsMessage = await messageParser.parse(config.get('keycloak.clientId'), body);
+  const parsed = await messageParser.parse(config.get('keycloak.clientId'), body);
+  // but let's just massage this object a bit...
+  const clogsMessage = {...parsed};
+  // move all the counts into a sub-object of data...
+  clogsMessage.clogs.data.items = {
+    count: parsed.clogs.data.logItemsCount,
+    fields: {
+      message: parsed.clogs.data.messageFieldCount,
+      data: parsed.clogs.data.dataFieldCount,
+      pattern: parsed.clogs.data.patternFieldCount,
+      level: parsed.clogs.data.levelFieldCount
+    }
+  };
+  // remove all the clogs data count fields.
+  delete clogsMessage.clogs.data.logItemsCount;
+  delete clogsMessage.clogs.data.messageFieldCount;
+  delete clogsMessage.clogs.data.dataFieldCount;
+  delete clogsMessage.clogs.data.patternFieldCount;
+  delete clogsMessage.clogs.data.levelFieldCount;
+
   return await logstashSvc.log(clogsMessage);
 };
 
