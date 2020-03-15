@@ -1,7 +1,7 @@
 const moment = require('moment');
 const grok = require('../grok').loadDefaultSync();
 const LOGLEVEL_PATTERN = grok.createPattern('^%{LOGLEVEL:level} %{GREEDYDATA:message}$');
-
+const uuid = require('uuid');
 /**
  *  @function grokParse
  *  Returns a promise for the parsed message based on a pattern
@@ -26,9 +26,12 @@ const messageParser = {
    *  @returns {object[]} Returns an array of JSON Object for HALPAS logstash
    */
   parseMany: async (authorizedParty, obj) => {
-    return await Promise.all(
-      obj.map(entry => messageParser.parse(authorizedParty, entry))
-    );
+    const txid = uuid.v4();
+    const ts = moment.utc().valueOf();
+    obj.forEach((item, idx) => {
+      item.transaction = {batch: {id: txid, size: obj.length, itemId:idx+1, timestamp:ts}};
+    });
+    return await Promise.all(obj.map(entry => messageParser.parse(authorizedParty, entry)));
   },
 
   /**
@@ -47,6 +50,12 @@ const messageParser = {
       timestamp: moment.utc().valueOf(),
       env: (obj && obj.env) ? obj.env : 'dev'
     };
+
+    if (obj && obj.transaction && obj.transaction === Object(obj.transaction)) {
+      Object.assign(clogs, obj.transaction);
+    } else {
+      clogs.batch = {id: uuid.v4(), size: 1, itemId: 1, timestamp: clogs.timestamp};
+    }
 
     if (obj && obj.metadata && obj.metadata === Object(obj.metadata)) {
       Object.assign(clogs, obj.metadata);
