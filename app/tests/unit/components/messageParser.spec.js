@@ -82,6 +82,9 @@ describe('parseMany', () => {
     expect(result).toBeTruthy();
     expect(Array.isArray(result)).toBeTruthy();
     expect(result).toHaveLength(2);
+    expect(parseSpy).toHaveBeenCalledTimes(2);
+    expect(parseSpy).toHaveBeenCalledWith(azp, obj[0]);
+    expect(parseSpy).toHaveBeenCalledWith(azp, obj[1]);
     expect(result[0].clogs.batch).toBeTruthy();
     expect(result[1].clogs.batch).toBeTruthy();
     expect(result[0].clogs.batch.id).toEqual(result[1].clogs.batch.id);

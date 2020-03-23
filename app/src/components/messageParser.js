@@ -29,7 +29,7 @@ const messageParser = {
     const txid = uuid.v4();
     const ts = moment.utc().valueOf();
     obj.forEach((item, idx) => {
-      item.transaction = {batch: {id: txid, size: obj.length, itemId:idx+1, timestamp:ts}};
+      item.transaction = {batch: {id: txid, size: obj.length, itemId: idx+1, timestamp: ts}};
     });
     return await Promise.all(obj.map(entry => messageParser.parse(authorizedParty, entry)));
   },
