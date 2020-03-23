@@ -9,7 +9,7 @@
     "start": "node ./bin/www",
     "lint": "node_modules/.bin/eslint . --no-fix --ext .js",
     "lint:fix": "node_modules/.bin/eslint . --fix --ext .js",
-    "test": "node_modules/.bin/jest --verbose",
+    "test": "node_modules/.bin/jest --verbose --no-cache",
     "clean": "rm -rf coverage dist",
     "pretest": "npm run lint",
     "purge": "rm -rf node_modules",

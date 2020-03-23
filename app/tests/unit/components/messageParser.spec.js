@@ -55,7 +55,43 @@ describe('parseMany', () => {
     expect(result[0]).toEqual(clogs);
     expect(result[1]).toEqual(clogs);
     expect(parseSpy).toHaveBeenCalledTimes(2);
-    expect(parseSpy).toHaveBeenCalledWith(azp, loggingEntryBase);
+    //expect(parseSpy).toHaveBeenCalledWith(azp, loggingEntryBase);
+  });
+
+  it('should return an array of CLOGS objects in a batch', async () => {
+    parseSpy.mockImplementation(async (authorizedParty, obj) => {
+      const clogs = {
+        client: authorizedParty,
+        level: 'info',
+        retention: 'default',
+        timestamp: moment.utc().valueOf(),
+        env:'dev'
+      };
+      Object.assign(clogs, obj.metadata);
+      Object.assign(clogs, obj.transaction);
+      return { clogs: clogs };
+    });
+
+    const obj = [
+      Object.assign({}, loggingEntryBase),
+      Object.assign({}, loggingEntryBase)
+    ];
+
+    const result = await messageParser.parseMany(azp, obj);
+
+    expect(result).toBeTruthy();
+    expect(Array.isArray(result)).toBeTruthy();
+    expect(result).toHaveLength(2);
+    expect(parseSpy).toHaveBeenCalledTimes(2);
+    expect(parseSpy).toHaveBeenCalledWith(azp, obj[0]);
+    expect(parseSpy).toHaveBeenCalledWith(azp, obj[1]);
+    expect(result[0].clogs.batch).toBeTruthy();
+    expect(result[1].clogs.batch).toBeTruthy();
+    expect(result[0].clogs.batch.id).toEqual(result[1].clogs.batch.id);
+    expect(result[0].clogs.batch.timestamp).toEqual(result[1].clogs.batch.timestamp);
+    expect(result[0].clogs.batch.itemId).toEqual(1);
+    expect(result[1].clogs.batch.itemId).toEqual(2);
+
   });
 });
 
